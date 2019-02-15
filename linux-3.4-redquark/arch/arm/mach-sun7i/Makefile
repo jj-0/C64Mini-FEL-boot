@@ -9,7 +9,7 @@ obj-y += gpio/
 obj-y += sys_config.o
 obj-$(CONFIG_CPU_FREQ) += cpu-freq/
 obj-$(CONFIG_PM) += pm/
-obj-$(CONFIG_NET) += rf/
+obj-$(CONFIG_WLAN) += rf/
 obj-$(CONFIG_AW_TIME_DELAY)	+= delay.o
 obj-$(CONFIG_SW_POWERNOW) += powernow.o
 
