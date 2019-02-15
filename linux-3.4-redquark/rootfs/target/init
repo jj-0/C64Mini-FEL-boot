@@ -1,0 +1,118 @@
+#!/bin/sh
+
+mount -t devtmpfs none /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+
+RAMFS_MODE=0
+#echo "======================================================================================" >>/dev/ttyS0
+ROOT_DEVICE="/dev/sda4"
+#echo "Commandline: " `cat /proc/cmdline` >>/dev/ttyS0
+#echo "======================================================================================" >>/dev/ttyS0
+for parm in $(cat /proc/cmdline); do
+    case $parm in
+        ramfs)
+            RAMFS_MODE=1
+            echo "======== C64Mini running in ramfs" >>/dev/ttyS0
+            #/sbin/getty -L ttyS0 115200 vt100 -n -l /bin/ash
+            ;;  
+        root=*)
+            ROOT_DEVICE=`echo $parm | awk -F\= '{print $2}'`
+            echo "root=$ROOT_DEVICE" >>/dev/ttyS0
+            ;;  
+    esac
+done
+
+alias modprobe='modprobe --force-vermagic'
+alias insmod='insmod -f'
+
+#echo "======================================================================================" >>/dev/ttyS0
+#echo "RAMFS_MODE=$RAMFS_MODE" >>/dev/ttyS0
+#echo "======================================================================================" >>/dev/ttyS0
+
+if [ "x$RAMFS_MODE" != "x1" ]
+then
+    echo "C64Mini going to mount $ROOT_DEVICE" >>/dev/ttyS0
+    case $ROOT_DEVICE in
+        /dev/nand*)
+    		insmod /opt/nand.ko
+            echo "insmod nand.ko return $?" >>/dev/ttyS0
+            ;;
+    esac
+
+    while true
+    do
+        if [ -b "$ROOT_DEVICE" ]
+        then
+            break
+        fi  
+		echo "wait $ROOT_DEVICE ready" >>/dev/ttyS0
+		sleep 1
+    done
+
+    echo "Executing temporary shell" >>/dev/ttyS0
+    /sbin/getty -L ttyS0 115200 vt100 -n -l /bin/ash
+
+    e2fsck -y $ROOT_DEVICE
+    echo "e2fsck $ROOT_DEVICE return $?" >>/dev/ttyS0
+    mount -o rw,noatime,nodiratime,norelatime,noauto_da_alloc,barrier=0,data=ordered -t ext4 $ROOT_DEVICE /mnt
+    echo "mount $ROOT_DEVICE return $?" >>/dev/ttyS0
+
+    if [ -x /mnt/init ] 
+    then
+		echo "executing switch_root /mnt /init" >>/dev/ttyS0
+		exec switch_root /mnt /init
+		echo "after switch_root to /init, you really shoudn't see this..." >>/dev/ttyS0
+    fi
+    if [ -x /mnt/linuxrc ]
+    then
+		echo "executing switch_root /mnt /linuxrc" >>/dev/ttyS0
+		exec switch_root /mnt /linuxrc
+		echo "after switch_root to /linuxrc, you really shoudn't see this..." >>/dev/ttyS0
+    fi
+    if [ -x /mnt/lib/systemd/systemd/systemd ]
+    then
+		echo "executing switch_root /mnt /lib/systemd/systemd/systemd" >>/dev/ttyS0
+		exec switch_root /mnt /lib/systemd/systemd/systemd
+		echo "after switch_root to /lib/systemd/systemd/systemd, you really shoudn't see this..." >>/dev/ttyS0
+    fi
+fi
+
+echo "Executing /linuxrc"
+
+/linuxrc
+
+echo "Sleeping forever just to make sure init is not killed" >>/dev/ttyS0
+
+while true; do
+    sleep 10000
+done
+
+echo "Somehow I dropped out of the sleep loop" >>/dev/ttyS0
+
+
+/sbin/getty -L ttyS0 115200 vt100 -n -l /bin/ash &
+
+echo "Starting wait for ttyUSB0" >>/dev/ttyS0
+    while true; do
+        if [ -c "/dev/ttyUSB0" ]
+        then
+            break
+        fi  
+        echo "wait for /dev/ttyUSB0" >> /dev/ttyS0
+        sleep 1
+    done
+echo "Executing getty on ttyUSB0 in background" >>/dev/ttyS0
+echo "C64Mini running in ramfs" >>/dev/ttyUSB0
+/sbin/getty -L ttyUSB0 115200 vt100 -n -l /bin/ash &
+
+echo "Sleeping forever just to make sure init is not killed" >>/dev/ttyS0
+
+while true; do
+    sleep 10000
+done
+
+echo "Somehow I dropped out of the sleep loop" >>/dev/ttyS0
+
+
+

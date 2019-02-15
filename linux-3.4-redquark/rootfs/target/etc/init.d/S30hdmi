@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. script_helper
+
+echo "${clr_grn}Executing $0"
+
+case "$1" in
+	start)
+		modprobe --force-vermagic fb
+		modprobe --force-vermagic disp
+		modprobe --force-vermagic lcd
+		modprobe --force-vermagic hdmi
+		killall yaft
+		;;
+	stop|*)
+		;;
+esac
+

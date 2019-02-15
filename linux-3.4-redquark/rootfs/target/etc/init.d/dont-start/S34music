@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. script_helper
+
+echo "${clr_grn}Executing $0"
+
+case "$1" in
+	start)
+		/opt/music.sh &
+		;;
+	stop)
+		killall music.sh
+		killall sidplay2
+		;;
+esac

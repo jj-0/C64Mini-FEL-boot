@@ -1,0 +1,68 @@
+#!/bin/sh
+
+. script_helper
+
+echo "${clr_grn}Executing $0"
+
+# Start all scripts on USB drive /dev/sda1 directory scripts if it exists
+# executing them in numerical order.
+#
+case "$1" in
+  start)
+		USB_PART=/dev/sda1
+
+		echo "${clr_grn}$0: Looking for scripts in $USB_PART"
+		
+		while [ ! -b "$USB_PART" ]
+		do
+			echo "${clr_grn}$0: waitng for $USB_PART"
+			sleep 5
+		done
+		
+		if [ -b "$USB_PART" ]
+		then
+			mount /dev/sda1 /mnt
+			if [ $? -eq 0 ]
+			then
+				echo "${clr_grn}$0: Mounted /dev/sda1 to /mnt"
+				for i in /mnt/scripts/S??*
+				do
+					 # Ignore dangling symlinks (if any).
+					 [ ! -f "$i" ] && continue
+					echo "${clr_grn}$0: Found script: $i" 
+					case "$i" in
+					*.sh)
+						# Source shell script for speed.
+						(
+						trap - INT QUIT TSTP
+						. $i
+						)
+						;;
+					*)
+						# No sh extension, so fork subprocess.
+						$i
+						;;
+					esac
+				done
+				umount /mnt
+				if [ $? -eq 0 ]
+				then
+					echo "${clr_grn}$0: Unmounted $USB_PART"
+				else
+					error=$?
+					echo "${clr_red}$0: Failed to unmount $USB_PART (error $error)"
+				fi
+			else
+				error=$?
+				echo "${clr_red}$0: Mounting /dev/sda1 to /mnt failed (error $error)"
+			fi
+			else
+				echo "${clr_red}$0: No $USB_PART found"
+		fi
+		echo "${clr_grn}$0: Finished looking for scripts in $USB_PART"
+		;;
+	stop|*)
+		;;
+esac
+
+exit $?

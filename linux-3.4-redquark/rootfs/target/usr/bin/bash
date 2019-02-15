@@ -1,0 +1,5 @@
+#!/bin/ash
+echo
+echo "                              ****  COMMODORE 64 MINI RAMFS SYSTEM  ****"
+echo
+ENV=/root/.profile /bin/ash

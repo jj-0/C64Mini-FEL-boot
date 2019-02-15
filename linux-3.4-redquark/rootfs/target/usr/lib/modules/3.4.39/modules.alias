@@ -1,0 +1,4 @@
+# Aliases extracted from modules themselves.
+alias platform:disp disp
+alias platform:lcd lcd
+alias platform:hdmi hdmi

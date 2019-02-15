@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. script_helper
+
+echo "${clr_grn}Executing $0"
+
+case "$1" in
+	start)
+		#/bin/fb-test
+		/bin/echo "x" | fbv --enlarge -r /opt/C64_start.png
+		;;
+	stop|*)
+		;;
+esac

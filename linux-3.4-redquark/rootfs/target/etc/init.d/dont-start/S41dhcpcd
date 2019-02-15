@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# Start/stop dhcpcd
+#
+
+. script_helper
+
+echo "${clr_grn}Executing $0"
+
+DAEMON=/sbin/dhcpcd
+CONFIG=/etc/dhcpcd.conf
+PIDFILE=/var/run/dhcpcd.pid
+
+[ -x $DAEMON ] || exit 0
+[ -f $CONFIG ] || exit 0
+
+case "$1" in
+  start)
+	echo "${clr_grn}Starting dhcpcd..."
+	start-stop-daemon -S -x "$DAEMON" -p "$PIDFILE" -- -f "$CONFIG"
+	;;
+  stop)
+	echo "${clr_grn}Stopping dhcpcd..."
+	start-stop-daemon -K -x "$DAEMON" -p "$PIDFILE" -o
+	;;
+  reload|force-reload)
+	echo "${clr_grn}Reloading dhcpcd configuration..."
+	"$DAEMON" -s reload
+	;;
+  restart)
+	"$0" stop
+	sleep 1 # Prevent race condition: ensure dhcpcd stops before start.
+	"$0" start
+	;;
+  *)
+	echo "${clr_grn}Usage: $0 {start|stop|restart|reload|force-reload}"
+	exit 1
+esac

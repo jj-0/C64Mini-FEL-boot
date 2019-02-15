@@ -1,0 +1,14 @@
+clr_red="\e[0;31m"
+clr_grn="\e[0;32m"
+clr_std="\e[m"
+
+function echo ()
+        {
+        for ttydev in /dev/ttyS0 /dev/ttyUSB?
+        do
+                if [ -c $ttydev ]
+                then
+			/bin/echo -e "$@$clr_std" >$ttydev
+                fi
+        done
+        }
