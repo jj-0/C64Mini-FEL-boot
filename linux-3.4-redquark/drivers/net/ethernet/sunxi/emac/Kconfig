@@ -1,0 +1,10 @@
+config SUNXI_EMAC
+       tristate "Sunxi platform 10/100Mbps Ethernet driver"
+       depends on HAS_IOMEM && NET_VENDOR_SUNXI
+       select NET_CORE
+       select MII
+       select PHYLIB
+       select CRC32
+       ---help---
+         This is the driver for the Sun7i Ethernet.
+

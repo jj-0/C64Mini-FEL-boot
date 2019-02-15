@@ -1,0 +1,45 @@
+#!/bin/sh
+
+mount -t devtmpfs none /dev
+mount -t proc proc /proc
+
+RAMFS_MODE=0
+ROOT_DEVICE="/dev/mmcblk0p7"
+for parm in $(cat /proc/cmdline); do
+    case $parm in
+        ramfs)
+            echo "running in ramfs" >> /dev/ttyS0
+            RAMFS_MODE=1
+            ;;  
+        root=*)
+            ROOT_DEVICE=`echo $parm | awk -F\= '{print $2}'`
+            ;;  
+    esac
+done
+
+if [ $RAMFS_MODE -ne 1 ] ; then
+    echo "root=$ROOT_DEVICE" >> /dev/ttyS0
+    case $ROOT_DEVICE in
+        /dev/nand*)
+    		insmod /lib/modules/`uname -r`/nand.ko
+            echo "insmod nand.ko return $?" >> /dev/ttyS0
+            ;;
+    esac
+
+    while true; do
+        if [ -b "$ROOT_DEVICE" ]; then
+            break
+        fi  
+        echo "wait $ROOT_DEVICE ready" >> /dev/ttyS0
+        sleep 1
+    done
+
+    e2fsck -y $ROOT_DEVICE
+    echo "e2fsck $ROOT_DEVICE return $?" >> /dev/ttyS0
+    mount -o ro,noatime,nodiratime,norelatime,noauto_da_alloc,barrier=0,data=ordered -t ext4 $ROOT_DEVICE /mnt
+    echo "mount $ROOT_DEVICE return $?" >> /dev/ttyS0
+fi
+
+[ -x /mnt/init ] && exec switch_root /mnt /init
+/sbin/getty -L ttyS0 115200 vt100 -n -l /bin/ash
+

@@ -1,0 +1,5 @@
+# Startup the system
+null::sysinit:/bin/mount -t proc proc /proc
+null::sysinit:/bin/mount -t devtmpfs none /dev
+# now run any rc scripts
+::sysinit:/etc/init.d/rcS

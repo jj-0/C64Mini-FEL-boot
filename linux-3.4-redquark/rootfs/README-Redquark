@@ -1,0 +1,2 @@
+rootfs.cpio.gz is a modified version of AllWinner's original, but changed to mount
+the real root filesystem "/" as RO not RW.
