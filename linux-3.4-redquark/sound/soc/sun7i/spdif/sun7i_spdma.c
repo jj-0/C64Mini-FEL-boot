@@ -138,7 +138,7 @@ static int sun7i_pcm_hw_params(struct snd_pcm_substream *substream,
 		/*
 		 * requeset audio dma handle(we don't care about the channel!)
 		 */
-		prtd->dma_hdl = sw_dma_request(prtd->params->name, CHAN_NORAML);
+		prtd->dma_hdl = sw_dma_request(prtd->params->name, CHAN_NORMAL);
 		if (NULL == prtd->dma_hdl) {
 			printk(KERN_ERR "failed to request spdif dma handle\n");
 			return -EINVAL;
