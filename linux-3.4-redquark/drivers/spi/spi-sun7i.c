@@ -535,7 +535,7 @@ static int sun7i_spi_config_dma(struct sun7i_spi *aw_spi, enum spi_dma_dir dma_d
     spi_hw_conf.bconti_mode                 = false;
     spi_hw_conf.irq_spt                     = CHAN_IRQ_FD;
     switch (aw_spi->dma_type) {
-        case CHAN_NORAML:
+        case CHAN_NORMAL:
             if (SPI_DMA_RDEV == dma_dir) {
                 spi_hw_conf.address_type.src_addr_mode  = NDMA_ADDR_NOCHANGE;
                 spi_hw_conf.address_type.dst_addr_mode  = NDMA_ADDR_INCREMENT;
@@ -1455,12 +1455,12 @@ static int __init sun7i_spi_probe(struct platform_device *pdev)
     aw_spi->master          = master;
     aw_spi->irq             = irq;
 #ifdef CONFIG_SUN7I_SPI_NDMA
-	aw_spi->dma_type        = CHAN_NORAML;
+	aw_spi->dma_type        = CHAN_NORMAL;
 #else
 	aw_spi->dma_type        = CHAN_DEDICATE;
 #endif
 	spi_inf("%s: spi%d dma type: %s\n", __func__, pdev->id,
-			aw_spi->dma_type == CHAN_NORAML ? "normal" : "dedicate");
+			aw_spi->dma_type == CHAN_NORMAL ? "normal" : "dedicate");
     aw_spi->dma_id_tx       = dma_res_tx->start;
     aw_spi->dma_id_rx       = dma_res_rx->start;
     aw_spi->dma_hdle_rx     = 0;

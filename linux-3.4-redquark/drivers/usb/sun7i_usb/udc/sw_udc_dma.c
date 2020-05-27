@@ -506,7 +506,7 @@ __s32 sw_udc_dma_probe(struct sw_udc *dev)
 		p[strlen(p) + 1] = 0;
 		p[strlen(p)] = i + '0';
 
-		dev->sw_udc_dma[i].dma_hdle = sw_dma_request(dev->sw_udc_dma[i].name, CHAN_NORAML);
+		dev->sw_udc_dma[i].dma_hdle = sw_dma_request(dev->sw_udc_dma[i].name, CHAN_NORMAL);
 		if(dev->sw_udc_dma[i].dma_hdle == 0) {
 			DMSG_PANIC("ERR: sw_dma_request failed\n");
 			return -1;
